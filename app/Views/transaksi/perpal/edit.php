@@ -35,7 +35,16 @@
 
         <div class="form-group">
             <label for="jumlah_hari_perpal">Jumlah Hari Perpal</label>
-            <input type="text" class="form-control" id="jumlah_hari_perpal" name="jumlah_hari_perpal" value="<?= $perpal['jlh_hari_perpal'] ?>">
+            <input type="text" class="form-control" id="jlh_hari_perpal" name="jlh_hari_perpal" value="<?= $perpal['jlh_hari_perpal'] ?>">
+        </div>
+
+        <div class="form-group">
+            <label for="total_">totall</label>
+            <input type="text" class="form-control" id="total_" name="total_" value="<?= $perpal['total_'] ?>">
+        </div>
+        <div class="form-group">
+            <label for="hasil_perhitungan_">Hasil</label>
+            <input type="text" class="form-control" id="hasil_perhitungan_" name="hasil_perhitungan_" value="<?= $perpal['hasil_perhitungan_'] ?>" readonly>
         </div>
         <div class="form-group">
             <label for="lokasi">Lokasi</label>
@@ -46,6 +55,52 @@
             <textarea class="form-control" id="keterangan" name="keterangan"><?= $perpal['keterangan'] ?></textarea>
         </div>
         <button type="submit" class="btn btn-primary">Update</button>
+        <button type="button" class="btn btn-secondary" id="btnBatal">Batal</button>
+
     </form>
 
+    <script>
+        $(document).ready(function() {
+            // Function to calculate the result
+            function calculateResult(index) {
+                var jlhHariPerpal = parseFloat($(`#jlh_hari_perpal${index}`).val()) || 0;
+                var total = parseFloat($(`#total_${index}`).val()) || 0;
+                var hasilPerhitungan = jlhHariPerpal * total;
+                $(`#hasil_perhitungan_${index}`).val(hasilPerhitungan);
+            }
+
+            // Event listener for input changes
+            $('[id^="jlh_hari_perpal"], [id^="total_"]').on('input', function() {
+                var index = $(this).attr('id').split('_').pop();
+                calculateResult(index);
+            });
+        });
+
+
+
+        $(document).on('click', '#btnBatal', function(e) {
+            $('#btnBatal').text('Batal...');
+            $('#btnBatal').attr('disabled', true);
+            Swal.fire({
+                title: 'Apakah anda yakin?',
+                text: "Data yg sudah dibatal tidak dapat di kembalikan !",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.history.back();
+
+                } else {
+                    $('#btnBatal').text('Batal');
+                    $('#btnBatal').attr('disabled', false);
+                }
+
+            })
+
+
+        })
+    </script>
     <?= $this->endSection() ?>

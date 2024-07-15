@@ -148,19 +148,20 @@ class Perpal extends BaseController
             'tanggal' => $this->request->getPost('tanggal'),
             'nama' => $this->request->getPost('nama'),
             'jlh_hari_perpal' => $this->request->getPost('jlh_hari_perpal'),
+            'total_' => $this->request->getPost('total_'),
+            'hasil_perhitungan_' => $this->request->getPost('hasil_perhitungan_'),
             'lokasi' => $this->request->getPost('lokasi'),
             'keterangan' => $this->request->getPost('keterangan')
         ];
 
 
 
-
         if ($this->perpal->update($id, $data)) {
             // Set flashdata
-            session()->setFlashdata('success', 'Data berhasil ditambah.');
+            session()->setFlashdata('success', 'Data berhasil update.');
         } else {
             // Set flashdata
-            session()->setFlashdata('error', 'Data gagal ditambah.');
+            session()->setFlashdata('error', 'Data gagal update.');
         }
         return redirect()->to('/transaksi/perpal');
     }
@@ -246,35 +247,25 @@ class Perpal extends BaseController
 
     public function create()
     {
-
-        $datadetail = [];
-
-
         $userData = auth()->user();
         if (($userData->role == 1) || (in_array('create_transaksi_perpal', json_decode($userData->access)))) {
 
-
-
             $header['no_transaksi'] = $_REQUEST['no_transaksi'];
             $header['tanggal'] = date('Y-m-d', strtotime($_REQUEST['tanggal']));
-            // $header['id'] = $_REQUEST['id'];
             $header['jabatan'] = $_REQUEST['jabatan'];
             $header['nama'] = $_REQUEST['nama'];
             $header['jlh_hari_perpal'] = $_REQUEST['jlh_hari_perpal'];
             $header['lokasi'] = $_REQUEST['lokasi'];
             $header['keterangan'] = $_REQUEST['keterangan'];
+            $header['total_'] = $_REQUEST['total_']; // Include the calculation result
+            $header['hasil_perhitungan_'] = $_REQUEST['hasil_perhitungan_']; // Include the calculation result
             $header['created_at'] = date('Y-m-d H:i:s');
             $header['created_by'] = $userData->id;
 
-            // echo "<pre>" . var_export($header, true);
-            // echo "<pre>" . var_export($datadetail, true);
-            // die;
-
-
             $insert = $this->perpal->insert($header);
 
-            if ($insert) {
 
+            if ($insert) {
                 $data = array('response' => 'success', 'message' => 'Tambah data berhasil');
             } else {
                 $data = array('response' => 'failed', 'message' => 'Tambah data gagal, silahkan dicoba lagi');
@@ -284,6 +275,7 @@ class Perpal extends BaseController
         }
         echo json_encode($data);
     }
+
 
     public function delete()
     {

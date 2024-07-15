@@ -39,24 +39,24 @@
                                 <label class="form-label"><b>Nama Supir/Kernet</b></label>
                                 <input type="text" class="form-control" name="nama" id="nama" readonly>
                             </div>
-                            <div class="col-lg-3">
+                            <div class="col-lg-3" style="margin-top: 20px;">
                                 <label class="form-label"><b>Jabatan</b></label>
                                 <input type="text" class="form-control" name="jabatan" id="jabatan" readonly>
                             </div>
 
-                            <div class="col-lg-3">
+                            <div class="col-lg-3" style="margin-top: 20px;">
                                 <label class="form-label"><b>Jumlah Hari Perpal</b></label>
                                 <input type="text" class="form-control" name="jlh_hari_perpal" id="jlh_hari_perpal">
                             </div>
-                            <div class="col-lg-3">
+                            <div class="col-lg-3" style="margin-top: 20px;">
                                 <label class="form-label"><b>Total</b></label>
-                                <input type="text" class="form-control" name="total" id="total">
+                                <input type="text" class="form-control" name="total_" id="total_">
                             </div>
-                            <div class="col-lg-3">
+                            <div class="col-lg-3" style="margin-top: 20px;">
                                 <label class="form-label"><b>Hasil Perhitungan</b></label>
-                                <input type="text" class="form-control" name="hasil_perhitungan" id="hasil_perhitungan" readonly>
+                                <input type="text" class="form-control" name="hasil_perhitungan_" id="hasil_perhitungan_" readonly>
                             </div>
-                            <div class="col-lg-9">
+                            <div class="col-lg-9" style="margin-top: 20px;">
                                 <label class="form-label"><b>Lokasi</b></label>
                                 <input type="text" class="form-control" name="lokasi" id="lokasi">
                             </div>
@@ -88,9 +88,7 @@
 
     <section class="section">
         <h1>Detail Perpal</h1>
-
         <div>
-            <!-- Display flashdata -->
             <?php if (session()->getFlashdata('success')) : ?>
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     <?= session()->getFlashdata('success') ?>
@@ -115,24 +113,31 @@
                         <th scope="col">No Transaksi</th>
                         <th scope="col">Tanggal Transaksi</th>
                         <th scope="col">Nama Supir/Kernet</th>
-                        <th scope="col">Jumlah Hari Perpal</th>
                         <th scope="col">Lokasi</th>
                         <th scope="col">Keterangan</th>
+                        <th scope="col">Jumlah Hari Perpal</th>
+                        <th scope="col">Total</th>
+
+                        <th scope="col">Hasil Perhitungan</th> <!-- Tambahkan kolom ini -->
                         <th scope="col">Aksi</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="perpal_table_body">
                     <?php if (!empty($perpal_list)) : ?>
                         <?php foreach ($perpal_list as $perpal) : ?>
                             <tr>
                                 <td><?= $perpal['no_transaksi'] ?></td>
                                 <td><?= $perpal['tanggal'] ?></td>
                                 <td><?= $perpal['nama'] ?></td>
-                                <td><?= $perpal['jlh_hari_perpal'] ?></td>
                                 <td><?= $perpal['lokasi'] ?></td>
                                 <td><?= $perpal['keterangan'] ?></td>
+                                <td><?= $perpal['jlh_hari_perpal'] ?></td>
+                                <td><?= $perpal['total_'] ?></td>
+                                <td><?= $perpal['hasil_perhitungan_'] ?></td>
+
+
+
                                 <td>
-                                    <!-- Action buttons like edit, delete, etc. -->
                                     <a href="perpal/edit/<?= $perpal['no_transaksi'] ?>" class="btn btn-warning btn-sm">Update</a>
                                     <a href="perpal/delete/<?= $perpal['no_transaksi'] ?>" class="btn btn-danger btn-sm">Delete</a>
                                 </td>
@@ -140,7 +145,7 @@
                         <?php endforeach; ?>
                     <?php else : ?>
                         <tr>
-                            <td colspan="9" class="text-center">No data available</td>
+                            <td colspan="8" class="text-center">No data available</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
@@ -150,22 +155,26 @@
 
     </section>
 
+
     <script>
-        function calculateResult() {
-            var jlhHariPerpal = parseFloat($('#jlh_hari_perpal').val()) || 0;
-            var total = parseFloat($('#total').val()) || 0;
-            var hasilPerhitungan = jlhHariPerpal * total;
-            $('#hasil_perhitungan').val(hasilPerhitungan);
-        }
+        $(document).ready(function() {
+            // Function to calculate the result
+            function calculateResult(index) {
+                var jlhHariPerpal = parseFloat($(`#jlh_hari_perpal${index}`).val()) || 0;
+                var total = parseFloat($(`#total_${index}`).val()) || 0;
+                var hasilPerhitungan = jlhHariPerpal * total;
+                $(`#hasil_perhitungan_${index}`).val(hasilPerhitungan);
+            }
 
-        // Event listeners for input changes
-        $('#jlh_hari_perpal, #total').on('input', function() {
-            calculateResult();
-
+            // Event listener for input changes
+            $('[id^="jlh_hari_perpal"], [id^="total_"]').on('input', function() {
+                var index = $(this).attr('id').split('_').pop();
+                calculateResult(index);
+            });
         });
-    </script>
 
-    <script>
+
+
         var tabel;
         var startdate;
         var datakolom = [];
@@ -176,9 +185,7 @@
 
         function initialize() {
             $('textarea').val('');
-
             var now = moment(new Date()).format("DD-MM-YYYY");
-
             $('#tanggal').val(now)
             var date = moment(new Date());
             var futureDate = date.add(6, 'days').format("DD-MM-YYYY");
@@ -191,16 +198,17 @@
             datakolom = data
             $('#btnTambah').show()
             $('#btnUpdate, #btnDelete').hide()
-
             $('.baris-row').remove()
             read_jamkerja()
             addheader(data);
             nomorbaru()
+            var conceptName = $('#kode_supir').find().val();
+            console.log(conceptName)
+
 
         }
 
         function nomorbaru() {
-
             $.ajax({
                 url: "<?= base_url('transaksi/perpal/read_last_transaksi') ?>",
                 type: "POST",
@@ -209,33 +217,29 @@
                 },
                 dataType: "JSON",
                 success: function(result) {
-                    console.log(result); // Debugging: melihat respons dari server
                     var tgl = $('#tanggal').val().split(
-                        '-'); // Mendapatkan nilai tanggal dari elemen HTML dengan ID 'tanggal'
+                        '-');
 
                     if (result === null || result === undefined || result === '') {
-                        // Jika result kosong atau tidak ada, maka generate nomor transaksi baru
+
                         var no_inv = 'PP-' + tgl[2].slice(2, 4) + tgl[1] + '0001';
                         $('#no_transaksi').val(
                             no_inv
-                        ); // Mengisi nilai elemen HTML dengan ID 'no_transaksi' dengan nomor transaksi baru
+                        );
                         sessionStorage.setItem('lastTransactionNumber', no_inv);
 
                     } else {
-                        // Jika result tidak kosong, tambahkan 1 ke nomor transaksi terakhir yang diperoleh dari result
-                        var str = result; // Mengambil nomor transaksi terakhir dari result
+                        var str = result;
 
-                        // Mengonversi string ke bilangan bulat dan menambahkannya
                         var num = parseInt(str, 10) + 1;
 
-                        // Mengonversi kembali ke string dengan tambahan nol di depan jika perlu
                         var lastid = num.toString().padStart(str.length, '0');
                         var no_inv = 'PP-' + tgl[2].slice(2, 4) + tgl[1] + lastid;
                         sessionStorage.setItem('lastTransactionNumber', no_inv);
 
                         $('#no_transaksi').val(
                             no_inv
-                        ); // Mengisi nilai elemen HTML dengan ID 'no_transaksi' dengan nomor transaksi yang diperbarui
+                        );
                         sessionStorage.setItem('lastTransactionNumber', no_inv);
 
                     }
@@ -318,8 +322,7 @@
 
 
                         addheader(data);
-                        $('.baris-row').remove(); // Menghapus baris sebelumnya
-
+                        $('.baris-row').remove();
                         res.nama.forEach(function(baris, x) {
                             $('#detail_jam').append(add_row(x, 0, 0));
                             if (oldid !== baris.kode_karyawan) {
@@ -327,10 +330,7 @@
                                 $('#nama-' + x).val(baris.nama_karyawan);
                                 oldid = baris.kode_karyawan;
                             }
-
-
                             if (res.data[baris.kode_karyawan]) {
-
                                 res.data[baris.kode_karyawan].forEach(function(dt, y) {
                                     listoption('#shift-' + x + '-' + y);
                                     $('#shift-' + x + '-' + y).val(dt.shift).change();
@@ -369,7 +369,6 @@
                     .attr('value', item.kode)
                     .text(item.kode);
 
-                // Append the new option to the select element
                 if (id != '') {
 
                     $('' + id + '').append(option);
@@ -884,7 +883,7 @@
                     if (res.response == 'success') {
 
                         toastr.success(res.message)
-                        location.reload(); // Refresh halaman setelah sukses
+                        location.reload();
 
                         initialize()
 
@@ -968,6 +967,8 @@
                         success: function(res) {
                             if (res.response == 'success') {
                                 toastr.success(res.messagge)
+                                location.reload();
+
                                 initialize()
                             } else if (res.response == 'failed') {
                                 toastr.error(res.messagge)
@@ -1004,6 +1005,8 @@
                 confirmButtonText: 'Yes!'
             }).then((result) => {
                 if (result.isConfirmed) {
+                    location.reload();
+
                     initialize()
                     $('#btnBatal').text('Batal');
                     $('#btnBatal').attr('disabled', false);
@@ -1024,7 +1027,6 @@
 
 
         function reload_table() {
-
             tabel.ajax.reload(null, false); //reload datatable ajax 
         }
         $(document).on('click', '#btnKaryawan', function(e) {
@@ -1040,7 +1042,6 @@
                 dataType: "JSON",
                 success: function(res) {
                     if (res.response == 'success') {
-
                         $('#showModal').modal('show')
                         $('#nik').val(res.data.nik);
                         $('#nama_lengkap').val(res.data.nama_lengkap);
@@ -1056,25 +1057,23 @@
         })
 
         $(document).ready(function() {
-            // First AJAX call to populate the #kode_supir dropdown
             $.ajax({
                 url: "<?= base_url('transaksi/perpal') ?>",
                 type: "GET",
                 dataType: "JSON",
                 success: function(res) {
                     if (res) {
-                        // Clear existing options first (if any)
+                        console.log("cek",
+                            res)
                         $('#kode_supir').empty();
-                        // Append new options based on received data
                         for (let i = 0; i < res.length; i++) {
                             $('#kode_supir').append("<option value='" + res[i].kode_karyawan + "'>" +
-                                res[i]
-                                .kode_karyawan + " - " + res[i].nama_karyawan + "</option>");
+                                res[i].kode_karyawan + " - " + res[i].nama_karyawan + "</option>");
                         }
                     }
                 },
                 error: function(xhr, status, error) {
-                    console.error(xhr.responseText); // Handle error if any
+                    console.error(xhr.responseText);
                 }
             });
         });
@@ -1095,7 +1094,6 @@
                 type: "POST",
                 dataType: "JSON",
                 success: function(res) {
-
                     console.log(res);
                     if (res) {
 

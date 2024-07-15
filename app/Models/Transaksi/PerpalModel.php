@@ -19,6 +19,8 @@ class PerpalModel extends Model
         'id',
         'nama',
         'jlh_hari_perpal',
+        'total_',
+        'hasil_perhitungan_',
         'lokasi',
         'keterangan',
         'created_at',
